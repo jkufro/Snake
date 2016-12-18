@@ -9,3 +9,4 @@ HOW TO PLAY:
   - The game will start by spawning the food (red) and the snake (white) in a random location on the board
   - To change the snake's direction simply use the arrow keys
   - To pause and unpause the game press the escape key
+  - The goal is to eat food and avoid eating yourself or moving off of the board
