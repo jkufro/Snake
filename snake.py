@@ -13,6 +13,7 @@ score_bar_height = 48 #pixels
 window_height = num_squares*square_width +score_bar_height
 window_width = num_squares*square_width
 game_speed_factor = 1.25 #lower makes the game faster
+paused = False
 
 """      %%%%%%%%%%%      MODEL      %%%%%%%%%%%%       """
 def new_snake(): #starts a new snake 
@@ -109,6 +110,21 @@ def win_show(score):
 
 	window.update()
 
+def paused_show():
+	c.delete(tkinter.ALL)
+	c.create_rectangle(0,0,window_width,window_height,fill='black')
+	c.create_rectangle(0,score_bar_height-2,window_width,score_bar_height,fill='white')
+	draw_snake(snake)
+	draw_food(food)
+	draw_high_score(highscore)
+	draw_score(score)
+	c.create_text(window_width//2,window_height//1.5, anchor = "s",
+		text = "PAUSED\n",fill = 'gray',font = ('Ubuntu',25))
+
+	c.create_text(window_width//2,window_height//3, anchor = "s",
+		text = "(esc)",fill = 'gray',font = ('Ubuntu',10))
+	window.update()
+
 """------------%%%%%%%%%%%%------------CONTROLLER------------%%%%%%%%%%%%------------"""
 def new_food(snake):
 	pos = [random.randint(0,num_squares-1),random.randint(0,num_squares-1)]
@@ -142,30 +158,34 @@ window = tkinter.Tk()
 """ direction is [0,-1] up     [1,0] right     [-1,0] left      [0,1] down"""
 def left_arrow(event):
 	global direction,frame_direction
-	if frame_direction == [1,0]:
+	if frame_direction == [1,0] or paused == True:
 		return None
 	direction = [-1,0]
 def right_arrow(event):
 	global direction,frame_direction
-	if frame_direction == [-1,0]:
+	if frame_direction == [-1,0] or paused == True:
 		return None
 	direction = [1,0]
 def up_arrow(event):
 	global direction,frame_direction
-	if frame_direction == [0,1]:
+	if frame_direction == [0,1] or paused == True:
 		return None
 	direction = [0,-1]
 def down_arrow(event):
 	global direction,frame_direction
-	if frame_direction == [0,-1]:
+	if frame_direction == [0,-1] or paused == True:
 		return None
 	direction = [0,1]
+
+def pause(event):
+	global paused
+	paused = not paused
 
 window.bind('<Left>',left_arrow)
 window.bind('<Right>',right_arrow)
 window.bind('<Up>',up_arrow)
 window.bind('<Down>',down_arrow)
-
+window.bind('<Escape>',pause)
 
 c = tkinter.Canvas(window,height = num_squares*square_width+score_bar_height, width = num_squares*square_width)
 c.pack()
@@ -184,11 +204,14 @@ while True:
 	direction = [0,0]
 	current_time = time.time() #used in when updating the board
 	while not is_end_game(snake):
-		draw_board(snake,food,score,highscore)
+		if paused == True:
+			paused_show()
+		else:
+			draw_board(snake,food,score,highscore)
 		this_time = time.time()-current_time
 		if starting == True:
 			direction = [0,0]
-		if this_time > .1125*game_speed_factor: #update board after specific time has passed
+		if this_time > .1125*game_speed_factor and paused == False: #update board after specific time has passed
 			frame_direction = direction
 			is_eating()
 			current_time = time.time()
